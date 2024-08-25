@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled Titles with Links and Logos</title>
+    <style>
+        /* Existing styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .main-title-wrapper {
+            background-color: #e0e0e0;
+            padding: 0px 0;
+            text-align: center;
+        }
+        .main-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            padding: 20px 40px;
+        }
+        .section {
+            margin: 10px auto;
+            width: 100%;
+            padding: 0 10px;
+        }
+        .title-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px; /* Added gap to prevent content overlap */
+            width: 100%;
+        }
+        .title-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px;
+            border-bottom: none;
+            max-width: 250px;
+            width: 250px; /* Fixed width to prevent shifting */
+            box-sizing: border-box;
+        }
+        .title-item img {
+            margin-bottom: 5px;
+            max-height: 60px;
+            max-width: 100px;
+        }
+        .title-item a {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Update transition */
+            text-align: center;
+            display: block;
+        }
+        .title-item a:hover, .title-item a.active {
+            background-color: #333;
+            color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .title-item a.active {
+            color: white;
+        }
+        .content {
+            display: none;
+            margin-top: 20px;
+            min-height: 200px; /* Ensure consistent height */
+            width: 100%; /* Ensure consistent width */
+            box-sizing: border-box; /* Ensure consistent box sizing */
+        }
+        .content.active {
+            display: block;
+        }
+        .title-container::after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 2px;
+            background-color: black;
+            margin: 0px 0; /* Space around the line */
+        }
+        table {
+            width: 100%; /* Adjust width to fit container */
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: auto; /* Auto layout for adjusting column width */
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd; /* Grid lines */
+        }
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold; /* Bold headers */
+            position: -webkit-sticky; /* For Safari */
+            position: sticky;
+            top: 0; /* Stick the header to the top */
+            z-index: 1; /* Ensure header is above other content */
+        }
+        td {
+            background-color: #fff; /* Default background color for rows */
+        }
+        tr:nth-child(even) td {
+            background-color: #f9f9f9; /* Alternating row color */
+        }
+        td a {
+            color: #007BFF; /* Blue color for hyperlinks */
+            text-decoration: underline; /* Underline hyperlinks */
+        }
+        td a:hover {
+            text-decoration: underline; /* Keep underline on hover */
+        }
+    </style>
+    <!-- Include the XLSX library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="main-title-wrapper">
+        <div class="main-title">
+            Experimental Simulation of Tornado-Like Vortices
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="title-container">
+            <div class="title-item">
+                <img src="../images/university_logo/DoubleT.jpg" alt="Texas Tech University Logo">
+                <a href="#" data-target="content-ttu">Texas Tech University</a>
+            </div>
+            <div class="title-item">
+                <img src="../images/university_logo/isu.png" alt="Iowa State University Logo">
+                <a href="#" data-target="content-isu">Iowa State University</a>
+            </div>
+            <div class="title-item">
+                <img src="../images/university_logo/wu.png" alt="Western University Logo">
+                <a href="#" data-target="content-wu">Western University</a>
+            </div>
+            <!-- Add more universities as needed -->
+        </div>
+
+        <!-- Content Sections -->
+        <div id="content-ttu" class="content">
+            <table id="excelTable"></table>
+        </div>
+        <div id="content-isu" class="content">
+            <p>Content about Iowa State University...</p>
+        </div>
+        <div id="content-wu" class="content">
+            <p>Content about Western University...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('.title-item a');
+            const contents = document.querySelectorAll('.content');
+
+            links.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault(); // Prevent default link behavior
+                    
+                    // Remove active class from all links and contents
+                    links.forEach(link => link.classList.remove('active'));
+                    contents.forEach(content => content.classList.remove('active'));
+
+                    // Add active class to the clicked link and corresponding content
+                    this.classList.add('active');
+                    const targetId = this.getAttribute('data-target');
+                    const targetContent = document.getElementById(targetId);
+                    targetContent.classList.add('active');
+
+                    // Load the table if the target is content-ttu
+                    if (targetId === 'content-ttu') {
+                        loadTable();
+                    }
+                });
+            });
+
+            function loadTable()  {
+    fetch('../tables/Characteristics%20of%20Tornado-Like%20Vortices.xlsx')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.arrayBuffer();
+        })
+        .then(data => {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0]; // Get the name of the first sheet
+            const sheet = workbook.Sheets[sheetName];
+            
+            // Convert the sheet to a 2D array
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
+            
+            // Filter out empty rows and columns
+            const filteredRows = rows.filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''));
+            
+            // Transpose the filtered data to remove empty columns
+            const transpose = arr => arr[0].map((_, i) => arr.map(row => row[i]));
+            const filteredColumns = transpose(filteredRows).filter(col => col.some(cell => cell !== null && cell !== undefined && cell !== ''));
+            const finalRows = transpose(filteredColumns);
+
+            // Generate HTML table with formatted data and links
+            const table = document.getElementById('excelTable');
+            table.innerHTML = ''; // Clear any existing content
+
+            finalRows.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                row.forEach((cell, cellIndex) => {
+                    const td = document.createElement(rowIndex === 0 ? 'th' : 'td');
+                    const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: cellIndex });
+                    const cellData = sheet[cellAddress];
+                    
+                    if (cellData) {
+                        if (cellData.l && cellData.l.Target) { // Check if there is a hyperlink
+                            const a = document.createElement('a');
+                            a.href = cellData.l.Target; // URL of the hyperlink
+                            a.textContent = cellData.v || cell;
+                            a.target = '_blank'; // Open link in a new tab
+                            td.appendChild(a);
+                        } else {
+                            // Apply formatting for numbers
+                            const cellFormat = cellData.z; // Get cell format
+                            if (cellFormat) {
+                                if (cellFormat.startsWith('0.')) {
+                                    // Format cell to a specific decimal place
+                                    const decimals = cellFormat.split('.')[1].length;
+                                    td.textContent = parseFloat(cell).toFixed(decimals);
+                                } else {
+                                    td.textContent = cell;
+                                }
+                            } else {
+                                td.textContent = cell;
+                            }
+                        }
+                    } else {
+                        td.textContent = cell;
+                    }
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+
+            // Adjust column widths based on content
+            adjustColumnWidths();
+        })
+        .catch(error => {
+            console.error('Error loading Excel file:', error);
+            document.getElementById('excelTable').innerHTML = '<p style="text-align: center;">Failed to load the file. Check the console for errors.</p>';
+        });
+}
+
+            function adjustColumnWidths() {
+                const table = document.getElementById('excelTable');
+                const rows = table.querySelectorAll('tr');
+
+                if (rows.length > 0) {
+                    const columnsCount = rows[0].children.length;
+                    const maxColumnWidths = Array(columnsCount).fill(0);
+
+                    // Calculate max width for each column
+                    rows.forEach(row => {
+                        row.querySelectorAll('td, th').forEach((cell, index) => {
+                            const cellWidth = cell.scrollWidth;
+                            if (cellWidth > maxColumnWidths[index]) {
+                                maxColumnWidths[index] = cellWidth;
+                            }
+                        });
+                    });
+
+                    // Set column widths based on max widths
+                    const headerCells = table.querySelectorAll('th');
+                    const dataCells = table.querySelectorAll('td');
+
+                    headerCells.forEach((cell, index) => {
+                        cell.style.width = `${maxColumnWidths[index]}px`;
+                    });
+                    dataCells.forEach((cell, index) => {
+                        cell.style.width = `${maxColumnWidths[index % columnsCount]}px`;
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
